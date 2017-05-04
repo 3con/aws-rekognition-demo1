@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Demo - Rekognition </title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/portfolio-item.css" rel="stylesheet">
+    <style type="text/css">
+        .modal
+        {
+            position: fixed;
+            z-index: 999;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;
+            background-color: Black;
+            filter: alpha(opacity=60);
+            opacity: 0.6;
+            -moz-opacity: 0.8;
+        }
+        .centerX
+        {
+            z-index: 1000;
+            margin: 300px auto;
+            padding: 10px;
+            width: 130px;
+            background-color: White;
+            border-radius: 10px;
+            filter: alpha(opacity=100);
+            opacity: 1;
+            -moz-opacity: 1;
+        }
+        .centerX img
+        {
+            height: 128px;
+            width: 128px;
+        }
+    </style>
+
+    <script src="js/aws-sdk.min.js"></script>
+    <script>
+       AWS.config.update({
+          accessKeyId: 'Your-Access-Key',
+          secretAccessKey: 'Your-Secret-Access-Key',
+          region: 'us-west-2',
+        });
+
+      AWS.config.apiVersions = {
+        rekognition: '2016-06-27',
+      };
+      var rekognition = new AWS.Rekognition();
+        
+        function dataURItoBlob(dataURI) {
+
+          var byteString = atob(dataURI.split(',')[1]);
+
+          var ab = new ArrayBuffer(byteString.length);
+          var ia = new Uint8Array(ab);
+          for (var i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+          }
+
+          return ab;
+        }
+    </script>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="modal" style="display: none">
+            <div class="centerX">
+                <img alt="" src="img/loader.gif" />
+            </div>
+        </div>
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+<!--            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#">About</a>
+                    </li>
+                    <li>
+                        <a href="#">Services</a>
+                    </li>
+                    <li>
+                        <a href="#">Contact</a>
+                    </li>
+                </ul>
+            </div>-->
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <!-- Portfolio Item Heading -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">图像识别推荐演示
+                    <small>AWS Rekognition</small>
+                </h1>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <!-- Portfolio Item Row -->
+        <div class="row">
+
+            <div class="col-md-8">
+                <video id="video" width="640" height="480" autoplay></video>
+                <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+            </div>
+
+            <div class="col-md-4">
+                <h3>系统描述</h3>
+                <p>通过AWS Rekognition服务识别图像中的消费者，根据如下规则推荐相关运动。</p>
+                <div class="table-responsive"> 
+                    <table class="table table-bordered table-striped responsive-utilities"> 
+                        <thead> 
+                            <tr> <th>性别\年龄</th><th>0~25 </th> <th>25-50</th> <th> 50-*</th> </tr> 
+                        </thead> 
+                        <tbody> <tr> <th scope="row">男性</th> 
+                            <td>打篮球</td> 
+                            <td>游泳</td> 
+                            <td>打太极</td> </tr> 
+                            <tr> <th scope="row">女性</th> 
+                            <td>打羽毛球</td> 
+                            <td>练瑜伽</td> 
+                            <td>散步</td></tr> 
+                        </tbody> </table> </div>
+
+                <button id="snap" class="btn btn-success">体验一下</button>
+            </div>
+
+        </div>
+        <!-- /.row -->
+
+        <!-- Related Projects Row -->
+        <div class="row">
+
+            <div class="col-lg-12">
+                <h3 class="page-header">为您推荐</h3>
+            </div>
+
+            <div class="col-sm-1 col-xs-6">
+                <canvas id="f_canvas_0" ></canvas>
+                <p id="p_0"></p>
+            </div>
+            <div class="col-sm-2 col-xs-6" >
+                <img id="img_0"  width="240" height="240" style="display: none"></img>
+            </div>
+
+            <div class="col-sm-1 col-xs-6">
+                <canvas id="f_canvas_1" ></canvas>
+                <p id="p_1"></p>
+            </div>
+            <div class="col-sm-2 col-xs-6">
+                <img id="img_1" width="240" height="240" style="display: none"></img>
+            </div>
+            <div class="col-sm-1 col-xs-6">
+                <canvas id="f_canvas_2" ></canvas>
+                <p id="p_2"></p>
+            </div>
+            <div class="col-sm-2 col-xs-6">
+                <img id="img_2" width="240" height="240" style="display: none"></img>
+            </div>
+            <div class="col-sm-1 col-xs-6">
+                <canvas id="f_canvas_3" ></canvas>
+                <p id="p_3"></p>
+            </div>
+            <div class="col-sm-2 col-xs-6">
+                <img id="img_3" width="240" height="240" style="display: none"></img>
+            </div>
+
+        </div>
+        <!-- /.row -->
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Copyright &copy; Amazon Web Services 2017</p>
+                </div>
+            </div>
+            <!-- /.row -->
+        </footer>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <script>
+    // Grab elements, create settings, etc.
+    var video = document.getElementById('video');
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    var localStream;
+    
+
+    // Get access to the camera!
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Not adding `{ audio: true }` since we only want video now
+        navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+            localStream=stream;
+            video.src = window.URL.createObjectURL(localStream);
+            video.play();
+        });
+    }
+    // Trigger photo take
+    document.getElementById("snap").addEventListener("click", function() {
+        if (canvas.style.display == "none"){
+            $(".modal").show();
+            context.drawImage(video, 0, 0, 640, 480);
+            var dataURL = canvas.toDataURL("image/png");
+            video.pause();
+            video.src=null;
+            video.style.display = "none";
+            canvas.style.display = "block";
+            var params = {Attributes:["ALL"],Image: {Bytes:dataURItoBlob(dataURL)}};
+            rekognition.detectFaces(params, function(err, data) {
+                   if (err) console.log(err, err.stack); // an error occurred
+                   else{
+                    console.log(data);           // successful response
+                    $(".modal").hide();     
+                    for(var i=0;i<data.FaceDetails.length&&i<4;i++){
+                        try{
+                            var face_height= data.FaceDetails[i].BoundingBox.Height;
+                            var face_left= data.FaceDetails[i].BoundingBox.Left;
+                            var face_top= data.FaceDetails[i].BoundingBox.Top;
+                            var face_width= data.FaceDetails[i].BoundingBox.Width;
+                            if (face_width<1&&face_top<1&&face_left<1&&face_height<1){
+                                var facecanvas = document.getElementById("f_canvas_"+i);
+                                var face_ctx=facecanvas.getContext('2d');
+                                face_ctx.drawImage(canvas,640*face_left,480*face_top,640*face_width,480*face_height,0,0,100,100);
+                                var average_age= (data.FaceDetails[i].AgeRange.High+data.FaceDetails[i].AgeRange.Low)/2;
+                                var gender=data.FaceDetails[i].Gender.Value;
+                                var img=document.getElementById("img_"+i);
+                                var word=document.getElementById("p_"+i);
+                                var html="";    
+                                if(gender=="Male"){
+                                    html+=" 男性 ";
+                                    if(average_age<=25){
+                                        img.src="img/male25.jpeg";
+                                        img.style.display ="block";
+                                    }else if(average_age<50){
+                                        img.src="img/male50.jpeg";
+                                        img.style.display ="block";
+                                    }else{
+                                        img.src="img/malex.jpeg";
+                                        img.style.display ="block";
+                                    }
+                                }else{
+                                    html+=" 女性 ";
+                                   if(average_age<=25){
+                                        img.src="img/female25.jpeg";
+                                        img.style.display ="block";
+                                    }else if(average_age<50){
+                                        img.src="img/female50.jpeg";
+                                        img.style.display ="block";
+                                    }else{
+                                        img.src="img/femalex.jpeg";
+                                        img.style.display ="block";
+                                    } 
+                                }
+                                html+= data.FaceDetails[i].AgeRange.Low+"~"+data.FaceDetails[i].AgeRange.High+"岁";
+                                word.innerHTML=html;
+                            }
+                            
+                        }catch(e){
+                            console.log(e);
+                        }
+                        
+                    }
+                   }     
+            });
+        }else if (canvas.style.display == "block"){
+            canvas.style.display = "none";
+            for(var i=0;i<4;i++){
+                var facecanvas = document.getElementById("f_canvas_"+i);
+                var face_ctx=facecanvas.getContext('2d');
+                face_ctx.clearRect(0, 0, facecanvas.width, facecanvas.height);
+                var img=document.getElementById("img_"+i);
+                img.src='';
+                img.style.display ="none";
+                document.getElementById("p_"+i).innerHTML="";
+            }
+            video.style.display = "block"; 
+            video.src = window.URL.createObjectURL(localStream);
+            video.play();
+        }else {
+
+        }
+    });
+
+</script>
+
+</body>
+
+</html>
