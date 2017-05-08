@@ -51,11 +51,17 @@
 
     <script src="js/aws-sdk.min.js"></script>
     <script>
-       AWS.config.update({
-          accessKeyId: 'Your-Access-Key',
-          secretAccessKey: 'Your-Secret-Access-Key',
-          region: 'us-west-2',
-        });
+	  AWS.config.region = 'Your-Region-ID';
+	  
+	  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+		IdentityPoolId: 'Your-Pool-ID',
+	  });
+
+	  AWS.config.credentials.get(function(){
+			var accessKeyId = AWS.config.credentials.accessKeyId;
+			var secretAccessKey = AWS.config.credentials.secretAccessKey;
+			var sessionToken = AWS.config.credentials.sessionToken;
+	  });
 
       AWS.config.apiVersions = {
         rekognition: '2016-06-27',
