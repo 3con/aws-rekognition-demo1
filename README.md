@@ -8,6 +8,6 @@
 
 ## 特别感谢
 
-***@Fei Zhao***	最初的代码，用于客户活动的Demo
-***@Leo Chen***	更完善的想法
+***@Fei Zhao***	最初的代码，用于客户活动的Demo  
+***@Leo Chen***	更完善的想法  
 ***@David Wang***	利用Amazon Cognito增加项目的安全性和可扩展性，整理Demo
